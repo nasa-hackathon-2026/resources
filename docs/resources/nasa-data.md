@@ -15,9 +15,12 @@
 | 大氣（AIRS：地表氣溫、水氣、臭氧、OLR） | Giovanni Cloud API | 同上 | 月：2002-09 → 今 |
 | 空氣品質（OMI：NO₂、O₃、SO₂、HCHO、UV aerosol index） | Giovanni Cloud API | 只有日資料，要自己 resample 成月 | 2004-10 → 今 |
 | 再分析（MERRA-2） | Giovanni Cloud API（`M2IMNXASM` 月瞬時）或 earthaccess（`M2TMNX*` 月平均） | Giovanni API 沒有月平均版本 | 1980 → 今 |
-| 植生、地表溫度、蒸散、GPP（MODIS） | **Planetary Computer**（免帳號）或 **AppEEARS**（區域統計 CSV） | Giovanni API **沒有 MODIS** [實測] | 2000-02 → 今 |
+| 植生、地表溫度、蒸散、GPP（MODIS） | **AppEEARS**（區域統計 CSV）、**Google Earth Engine**（伺服器端區域平均）或 **Planetary Computer**（免帳號） | Giovanni API **沒有 MODIS** [實測] | 2000-02 → 今 |
+| 地面測站氣溫（驗證用，NOAA） | **NOAA GHCNh**（AWS Open Data） | GSOD 已停更；GHCNh 免帳號、CC0 | 台中、台北：→ 2026-11 |
 
-**所有 Giovanni、AppEEARS、earthaccess 路線都需要免費的 Earthdata Login（EDL）帳號。** Planetary Computer 不需要帳號。
+**所有 Giovanni、AppEEARS、earthaccess 路線都需要免費的 Earthdata Login（EDL）帳號。** Earth Engine 需要 Google 帳號與非商用註冊（免費、不用綁卡）；Planetary Computer、NASA POWER、AWS Open Data 不需要帳號。
+
+**GCP、AWS 上的同一批 NASA 產品仍是 NASA data。** 引用時寫原始產品與 DOI，再註明取得管道，例如「MOD13A3 v061, doi:10.5067/MODIS/MOD13A3.061, accessed via Google Earth Engine `MODIS/061/MOD13A3`」。
 
 ### 今天就要做的前置作業
 
@@ -29,8 +32,9 @@
 
 1. **主幹：Giovanni Cloud API。** 使用者在地圖上點位置時，即時打 `/timeseries`；預設區域（台灣本島、縣市）的區域平均用 Harmony 先批次跑好、存成靜態檔。
 2. **MODIS 補位：Planetary Computer 或 AppEEARS，一律離線預抓。** AppEEARS 是非同步 task，曾有排隊數天的紀錄，demo 現場絕對不要即時送出。
-3. **備援：earthaccess 加 Cloud OPeNDAP。** 只在 Giovanni quota 用完、Harmony 太慢、或需要 MERRA-2 月平均時使用。
-4. **Hydrology Time Series 不另外寫程式。** 它的程式化存取就是 Giovanni `/timeseries` [官方]，簡報裡說明這個對應關係即可算作有整合。
+3. **區域平均快速路徑：Google Earth Engine。** 在伺服器端算區域月平均，一次拿到 25 年序列，可以取代 AppEEARS 與 Harmony 的等待；Giovanni 與 AppEEARS 仍是主線，因為它們在題目 Resources 分頁上。
+4. **備援：earthaccess 加 Cloud OPeNDAP；MERRA-2 氣溫另可用 NASA POWER 交叉驗證。** 只在 Giovanni quota 用完、Harmony 太慢、或需要 MERRA-2 月平均時使用。
+5. **Hydrology Time Series 不另外寫程式。** 它的程式化存取就是 Giovanni `/timeseries` [官方]，簡報裡說明這個對應關係即可算作有整合。
 
 評審的 Relevance 項目要求 NASA data 是「core component」而不是點綴（見 [official-guides.md](./official-guides.md)），所以趨勢計算的主資料必須是上表的 NASA 產品；ERA5、TerraClimate、Meteomatics 只能當比較層。
 
@@ -158,6 +162,39 @@ Planetary Computer 是 Global Offer，不在題目 Resources 分頁上，但它�
 | `nasa-nex-gddp-cmip6` | NASA 降尺度 CMIP6 | 1950 → 2100，可做「未來情境」延伸 |
 
 注意：Planetary Computer 上的 `gpm-imerg-hhr` 只到 2021-05、`era5-pds` 最新到 2020-12、`terraclimate` 只到 2021-12，都已停更；OMI、AIRS、MERRA-2、GLDAS 不在上面。Hub（免費 compute）已在 2024-06-06 退役，只剩資料與 API。
+
+---
+
+## Google Earth Engine（GCP）
+
+- 資料目錄：https://developers.google.com/earth-engine/datasets ；機器可讀的 STAC：`https://storage.googleapis.com/earthengine-stac/catalog/catalog.json`
+- 為什麼有用：在 Google 的伺服器端用 `reduceRegion` 算區域平均，不必下載影像，也不必等 AppEEARS 或 Harmony 的非同步 job。
+- 認證與費用 [官方]：需要 Google Cloud project、啟用 Earth Engine API、註冊為 noncommercial，註冊後立即可用。2026-04-27 起非商用分級，**Community Tier 每月 150 EECU-hours，不需要 billing account**，所以不必動用 Space Apps 的 Google Cloud 試用額度。
+- 本機腳本用個人 OAuth（`earthengine authenticate`），憑證存在家目錄；不要建立 service account 的 JSON 金鑰。
+- 限制：互動請求（`getInfo`）上限 5 分鐘，高頻資料（GLDAS 3 小時、MERRA-2 逐時）要按年分批。非商用條款不得因 EE 產出的應用或資料「receive compensation」，專案描述註明 educational／noncommercial。
+
+| 本題變數 | EE asset | 期間（STAC，2026-11-14） |
+|---|---|---|
+| MODIS NDVI | `MODIS/061/MOD13A3` | 2000-02 → 2026-10 [實測] |
+| MODIS LST | `MODIS/061/MOD11A2` | 2000-02 → 2026-11 |
+| GLDAS 氣溫、土壤水、蒸散 | `NASA/GLDAS/V021/NOAH/G025/T3H`（3 小時） | 2000-01 → 2026-10-15 [實測] |
+| IMERG 月降水 | `NASA/GPM_L3/IMERG_MONTHLY_V07` | 1998-01 → 2025-09 [實測] |
+| IMERG 半小時 | `NASA/GPM_L3/IMERG_V07` | → 2026-11-13；2025-10 之後標 `status=provisional`，和 Final 是不同版本，要分段標示 |
+| MERRA-2 逐時地面 | `NASA/GSFC/MERRA/slv/2` | 1980-01 → 2026-10 |
+| 總臭氧（TOMS＋OMI 合併） | `TOMS/MERGED_V4` | 1978-11 → 2026-11 |
+
+**EE 沒有** AIRS、OMI NO₂、OMI UV 氣膠指數；NO₂ 只有 ESA 的 Sentinel-5P（2018 起，不是 NASA 資料）。這些仍走 Giovanni。
+
+## NASA POWER（資料也放在 AWS）
+
+- API：`https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=T2M&community=AG&longitude=120.68&latitude=24.15&start=2000&end=2026&format=JSON`
+- 免認證；台中 2000-01 → 2026-09 有值，回應約 0.6 秒 [實測]。資料源自 MERRA-2，可當 Giovanni MERRA-2 氣溫的交叉驗證或備援。
+- 回傳鍵 `YYYY13` 是年平均，`-999` 是缺值。`IMERG_PRECTOT` 參數對台中點回傳全是 -999，不要用。
+- 同一批資料也放在 AWS Open Data 的 `nasa-power` bucket（公開）。
+
+## AWS 上的 NASA Earthdata Cloud（本機不適用）
+
+NASA Earthdata Cloud 放在 AWS us-west-2。各 DAAC 的 `/s3credentials` 發的是**同區域、唯讀**的暫時 S3 憑證 [官方]，所以在台灣本機跑腳本只能走 HTTPS，earthaccess 已經涵蓋這條路，不需要另外處理。
 
 ---
 

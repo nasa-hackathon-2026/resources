@@ -48,20 +48,25 @@
 | [Giovanni](https://giovanni.gsfc.nasa.gov/) | GES DISC 的網頁分析工具，另有雲端 API | **最核心。** 雲端 API 涵蓋 IMERG、GLDAS、MERRA-2、AIRS、OMI 共 867 個變數，單點序列同步回 CSV | 後端主幹：`/timeseries` 加 Harmony 區域平均 | 高 |
 | [Hydrology Time Series](https://disc.gsfc.nasa.gov/information/tools?title=Hydrology%20Time%20Series) | 舊名 Data Rods，單點水文時間序列網頁 | 程式化存取就是 Giovanni `/timeseries`，不必另外串 | 簡報說明對應關係；可做颱風事件放大 | 中 |
 | [AppEEARS](https://appeears.earthdatacloud.nasa.gov/) | LP DAAC 的陸地產品抽取工具，有 REST API | 補上 Giovanni API 沒有的 **MODIS**（NDVI、LST、ET），area task 附區域統計 CSV | 今晚先送 task，結果存成靜態檔 | 高 |
-| [Climate Data Online (CDO)](https://www.ncei.noaa.gov/cdo-web/) | NOAA 測站氣候資料 | 台灣覆蓋很零碎（見下方說明），只適合當地面驗證 | 用 GSOD 清泉崗站驗證衛星序列 | 中 |
+| [Climate Data Online (CDO)](https://www.ncei.noaa.gov/cdo-web/) | NOAA 測站氣候資料 | 台灣覆蓋很零碎（見下方說明），只適合當地面驗證 | 改用同屬 NCEI 的 GHCNh（AWS Open Data）台中、台北站驗證衛星序列 | 中 |
 | [SeaWiFS 葉綠素時間序列論文](https://ntrs.nasa.gov/api/citations/20090042747/downloads/20090042747.pdf) | Acker et al. 2009，用 Giovanni 做趨勢偵測的示範 | **方法論依據**：月平均、OLS 加 F-test、月距平、robust regression | 當統計模組的 baseline；Pearl River 外海案例可做在地化故事 | 高 |
 
 CDO 的台灣測站實況 [實測]：
 
 - GHCN-Daily 裡**台灣 0 站**，所以 CDO 的 GHCND 與 GSOM 查不到台灣。
-- GSOD 有台灣站，免 token，可透過 NCEI Access Data Service 抓，但**所有站都停在 2025-08-24**（ISD 已停更，由 GHCNh 取代）。單位是 °F、inch，`units=metric` 不會換算。
-  - 台中清泉崗 `46770099999`：1952 → 2025-08
-  - 台北松山 `46696099999`：1946 → 2025-08
-- GHCNh 小時資料有更新到 2026-11，但每站約 450 MB。
-- CDO v2 API 要申請 token、每秒 5 次、每天 1 萬次；建議直接用免 token 的 Access Data Service：
+- GSOD **已正式停更**（BigQuery 公開資料集說明寫「officially discontinued」），台灣站都停在 **2025-08-24**，AWS 上的 `noaa-gsod-pds` 也沒有 2026 年。單位是 °F、inch，`units=metric` 不會換算。
+  - 台中清泉崗 `46770099999`：**2001–2013 年完全沒有資料**（2014 年才恢復），不能做 2000 年起的趨勢 [實測]。
+  - 台北松山 `46696099999`：2000–2025-08 完整。
+- **建議改用 GHCNh**（ISD 的後繼資料集），放在 AWS Open Data 的 `noaa-ghcnh-pds`，免帳號、匿名 HTTPS 下載，授權 **CC0-1.0**（NOAA 要求標示出處）[實測]：
+  - 台中 `CHM00059158`（中央氣象署台中站，WMO 59158，24.15N 120.68E）：1946 → 2026-11-10
+  - 台北 `CHM00058968`（中央氣象署台北站）：1957 → 2026-11-10
+  - 2025 年台中月均溫和 GSOD `59158099999` 相差 ≤ 0.1 °C [實測]；**只有氣溫可用**，降水欄位幾乎是空的。
+  - 下載：`https://noaa-ghcnh-pds.s3.amazonaws.com/hourly/access/by-year/<YYYY>/psv/GHCNh_CHM00059158_<YYYY>.psv`
+- 授權注意：NCEI 的 GSOD 說明依 WMO Resolution 40，非美國站的資料或衍生產品「shall not be provided to other users」；AWS 上的 NODD 標示 CC0。兩者說法不一致，保守做法是只公開月平均並註明教育、非商業用途（法律解讀未查證）。
+- CDO v2 API 要申請 token、每秒 5 次、每天 1 萬次；查 GSOD 可以用免 token 的 Access Data Service，例如：
 
 ```
-https://www.ncei.noaa.gov/access/services/data/v1?dataset=global-summary-of-the-day&stations=46770099999&startDate=2000-01-01&endDate=2025-08-24&dataTypes=TEMP,PRCP,MAX,MIN&format=csv
+https://www.ncei.noaa.gov/access/services/data/v1?dataset=global-summary-of-the-day&stations=46696099999&startDate=2000-01-01&endDate=2025-08-24&dataTypes=TEMP,PRCP,MAX,MIN&format=csv
 ```
 
 台灣測站的權威來源是中央氣象署的 CODiS 與開放資料平台，不在題目資源內，也還沒查證 API 細節。

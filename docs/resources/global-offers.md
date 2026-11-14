@@ -57,7 +57,9 @@ Global Collaborators 提供的免費工具，全部是選用的。本頁依「�
 
 - 網址：https://cloud.google.com/free/docs/free-cloud-features
 - 內容：US$300、90 天；要信用卡驗證，但試用結束後不會自動扣款；可用 Firebase、Maps API。
-- 對本題：如果統計要即時計算（例如使用者自訂點位），可以把 Python API 放 Cloud Run。Earth Engine 不在這個 offer 裡（未查證）。
+- 對本題：如果統計要即時計算（例如使用者自訂點位），可以把 Python API 放 Cloud Run。
+- **Google Earth Engine 不需要這筆額度**：非商用的 Community Tier 每月 150 EECU-hours、不需要 billing account（2026-04-27 起的官方分級）。EE 對本題的用法見 [nasa-data.md](./nasa-data.md#google-earth-engine-gcp)。BigQuery 查公開資料也在免費額度內，但 BigQuery 上的 GSOD 已停更，對本題沒有幫助。
+- AWS 不在 2026 年的 Global Offers 中；本題用到的 AWS 公開資料（NOAA GHCNh、NASA POWER）不需要 AWS 帳號。
 - 支援窗口：cloudstartupsupport@google.com
 
 ## Miro（低–中）
