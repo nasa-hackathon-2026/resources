@@ -39,7 +39,8 @@ NASA Space Apps Challenge 2026 台中場、題目「[Be An Earth System Trend De
 | ★ | Giovanni（含 Cloud API） | https://giovanni.gsfc.nasa.gov/ | 網頁；API `api.giovanni.earthdata.nasa.gov` | 免費 Earthdata Login；每月 quota |
 | ★ | Hydrology Time Series（舊名 Data Rods） | https://disc.gsfc.nasa.gov/information/tools?title=Hydrology%20Time%20Series | 網頁免登入；API 同 Giovanni `/timeseries` | API 需 Earthdata Login |
 | ★ | AppEEARS | https://appeears.earthdatacloud.nasa.gov/ | 網頁；REST API | 免費 Earthdata Login；非同步，可能排隊 |
-| ○ | Climate Data Online (CDO) | https://www.ncei.noaa.gov/cdo-web/ | 網頁；v2 API；Access Data Service | v2 需 token；台灣測站零碎 |
+| ○ | Climate Data Online (CDO) | https://www.ncei.noaa.gov/cdo-web/ | 網頁；v2 API；Access Data Service | v2 需 token；台灣測站零碎；GSOD 已停更 |
+| ○ | NOAA GHCNh（CDO 測站的後繼取得管道） | https://registry.opendata.aws/noaa-ghcnh/ | AWS Open Data 匿名 HTTPS | CC0，需標出處；台中、台北氣溫到 2026-11 |
 | ★ | Acker et al. 2009 SeaWiFS 時間序列論文 | https://ntrs.nasa.gov/api/citations/20090042747/downloads/20090042747.pdf | PDF | 公開 |
 | ○ | KNMI Climate Explorer | https://climexp.knmi.nl/ | 網頁 | 匿名可用，有人機驗證；無 API |
 | ○ | Statistical test methods to detect trends | https://medium.com/@snp.kriss/statistical-test-methods-to-detect-trends-in-time-series-data-b361a0ec530b | 網頁 | Medium 可能要求登入 |
@@ -59,7 +60,9 @@ NASA Space Apps Challenge 2026 台中場、題目「[Be An Earth System Trend De
 | ★ | MERRA-2 月 `M2IMNXASM`、`M2TMNX*` | https://disc.gsfc.nasa.gov/ | Giovanni API（瞬時）；earthaccess（月平均） | Earthdata Login |
 | ★ | AIRS 月 `AIRS3STM` 7.0 | https://disc.gsfc.nasa.gov/ | Giovanni API；earthaccess | Earthdata Login |
 | ★ | OMI 日 `OMNO2d`、`OMTO3d` 等 | https://disc.gsfc.nasa.gov/ | Giovanni API；earthaccess | Earthdata Login；要自己轉月 |
-| ★ | MODIS NDVI、LST、ET、GPP | https://planetarycomputer.microsoft.com/catalog | Planetary Computer STAC；AppEEARS | PC 免帳號（需 SAS token）；AppEEARS 需 Earthdata Login |
+| ★ | MODIS NDVI、LST、ET、GPP | https://planetarycomputer.microsoft.com/catalog | AppEEARS；Earth Engine；Planetary Computer STAC | AppEEARS 需 Earthdata Login；EE 需非商用註冊；PC 免帳號（需 SAS token） |
+| ★ | Google Earth Engine（GCP） | https://developers.google.com/earth-engine/datasets | Python API `ee`，伺服器端區域平均 | 非商用 Community Tier 免費、不用綁卡；無 AIRS、OMI NO₂ |
+| ○ | NASA POWER | https://power.larc.nasa.gov/ | REST API；AWS `nasa-power` bucket | 免認證；MERRA-2 氣溫交叉驗證 |
 | ○ | earthaccess + Cloud OPeNDAP | https://github.com/nsidc/earthaccess | Python 套件 | Earthdata Login；地端 OPeNDAP 已關閉 |
 | ○ | SWOT Hydrocron | https://podaac.github.io/hydrocron/ | REST API | 免認證 |
 | ○ | NASA NEX-GDDP-CMIP6 | https://planetarycomputer.microsoft.com/dataset/nasa-nex-gddp-cmip6 | Planetary Computer | 免帳號；未來情境延伸用 |
