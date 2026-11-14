@@ -28,6 +28,19 @@ Claude 與 Codex 都有三個標準 agent：planner、worker、reviewer。職責
 預設走 `docs/agents/workflow.md`：釐清、spec、tickets、實作（tdd）、審查、回顧。不跳階段。
 環境與驗證指令見 `docs/agents/dev-env.md`；專案要在自己的 `AGENTS.md` 宣告「驗證指令」區塊。
 
+## 驗證指令
+本 repo 只有 Markdown 文件，沒有程式碼。
+- 安裝：無（需要 `bash`、`curl`）
+- 格式：無
+- 靜態檢查：無
+- 測試（全部）：`scripts/check-links.sh`
+- 測試（單檔）：`scripts/check-links.sh <檔案>`
+
+## 資源文件的寫法
+- 新增或修改資源時，同時更新 `README.md` 的索引與 `docs/resources/` 下對應的檔案。
+- 每筆資源要有來源網址（以官方頁面為準）、取得方式、使用條件、查證日期，並用 [實測]、[官方]、未查證 標示可信度。
+- 不放主辦方發給報名者的分享連結（Slack 邀請、Drive、表單、會議室）。
+
 Skills 來源：上游 `mattpocock/skills` 的 plugin（安裝方式見 `docs/agents/skill-routing.md`）。
 
 ## 記錄與寫作
